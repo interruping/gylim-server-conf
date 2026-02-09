@@ -14,6 +14,7 @@ BIND_ADDRESS=${LOCAL_IP} \
 NGINX_TEMPLATE=http.conf.template \
 N8N_PROTOCOL=http \
 N8N_HOST=${LOCAL_IP} \
+N8N_SECURE_COOKIE=false \
 WEBHOOK_URL=http://${LOCAL_IP}/ \
 docker compose up -d postgres n8n nginx
 

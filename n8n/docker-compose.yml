@@ -40,6 +40,7 @@ services:
       N8N_RUNNERS_ENABLED: "true"
       N8N_HOST: ${N8N_HOST}
       N8N_PROTOCOL: ${N8N_PROTOCOL}
+      N8N_SECURE_COOKIE: ${N8N_SECURE_COOKIE:-true}
       WEBHOOK_URL: ${WEBHOOK_URL}
     volumes:
       - n8n_data:/home/node/.n8n
