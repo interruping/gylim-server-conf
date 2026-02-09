@@ -61,6 +61,7 @@ services:
       DOMAIN_NAME: ${DOMAIN_NAME}
       OTHER_SERVICE_DOMAIN: ${OTHER_SERVICE_DOMAIN}
       OTHER_SERVICE_UPSTREAM: ${OTHER_SERVICE_UPSTREAM}
+      OTHER_SERVICE_BACKEND: ${OTHER_SERVICE_BACKEND}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
