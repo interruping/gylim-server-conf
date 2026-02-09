@@ -33,7 +33,8 @@ echo ""
 echo "=== 외부 접근 설정 ==="
 echo "계속하기 전에 아래 사항을 확인하세요:"
 echo "  1. DNS: ${DOMAIN_NAME} → 공인 IP 연결"
-echo "  2. 포트포워딩: 80, 443 포트 → 이 서버로 전달"
+echo "  2. DNS: ${OTHER_SERVICE_DOMAIN} → 공인 IP 연결"
+echo "  3. 포트포워딩: 80, 443 포트 → 이 서버로 전달"
 echo ""
 read -p "[4/6] DNS 및 포트포워딩 준비 완료 → Enter..."
 
@@ -48,6 +49,14 @@ docker compose run --rm --entrypoint "certbot certonly \
     --agree-tos \
     --no-eff-email \
     -d ${DOMAIN_NAME}" certbot
+
+docker compose run --rm --entrypoint "certbot certonly \
+    --webroot \
+    --webroot-path=/var/www/certbot \
+    --email ${SSL_EMAIL} \
+    --agree-tos \
+    --no-eff-email \
+    -d ${OTHER_SERVICE_DOMAIN}" certbot
 
 echo "[6/6] HTTPS 모드 전환 + 외부 접근 개방..."
 docker compose up -d
