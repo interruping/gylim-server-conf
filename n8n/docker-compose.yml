@@ -38,9 +38,9 @@ services:
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
       N8N_RUNNERS_ENABLED: "true"
-      N8N_HOST: ${DOMAIN_NAME}
-      N8N_PROTOCOL: https
-      WEBHOOK_URL: https://${DOMAIN_NAME}/
+      N8N_HOST: ${N8N_HOST}
+      N8N_PROTOCOL: ${N8N_PROTOCOL}
+      WEBHOOK_URL: ${WEBHOOK_URL}
     volumes:
       - n8n_data:/home/node/.n8n
     networks:

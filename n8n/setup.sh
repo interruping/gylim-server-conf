@@ -5,17 +5,41 @@ source .env
 
 echo "=== n8n + Nginx + PostgreSQL 초기 설정 ==="
 echo "도메인: ${DOMAIN_NAME}"
+echo "로컬 IP: ${LOCAL_IP}"
 echo ""
 
-# ─── 1. HTTP 모드로 Nginx 시작 (인증서 발급용) ───
-echo "[1/5] HTTP 모드로 Nginx 시작..."
-NGINX_TEMPLATE=http.conf.template docker compose up -d nginx
+# ─── Phase 1: 로컬 전용 HTTP 기동 ───
+echo "[1/6] HTTP 모드로 서비스 시작 (LAN 전용)..."
+BIND_ADDRESS=${LOCAL_IP} \
+NGINX_TEMPLATE=http.conf.template \
+N8N_PROTOCOL=http \
+N8N_HOST=${LOCAL_IP} \
+WEBHOOK_URL=http://${LOCAL_IP}/ \
+docker compose up -d postgres n8n nginx
 
-echo "[2/5] Nginx 기동 대기 (5초)..."
+echo "[2/6] 서비스 기동 대기 중..."
+sleep 10
+
+echo ""
+echo "=== 관리자 계정을 생성하세요 ==="
+echo "같은 네트워크의 PC에서 http://${LOCAL_IP} 접속 후"
+echo "관리자 계정을 생성하고 Enter 를 눌러주세요."
+echo ""
+read -p "[3/6] 관리자 계정 생성 완료 → Enter..."
+
+# ─── Phase 2: SSL + 외부 접근 개방 ───
+echo ""
+echo "=== 외부 접근 설정 ==="
+echo "계속하기 전에 아래 사항을 확인하세요:"
+echo "  1. DNS: ${DOMAIN_NAME} → 공인 IP 연결"
+echo "  2. 포트포워딩: 80, 443 포트 → 이 서버로 전달"
+echo ""
+read -p "[4/6] DNS 및 포트포워딩 준비 완료 → Enter..."
+
+echo "[5/6] Let's Encrypt 인증서 발급 중..."
+NGINX_TEMPLATE=http.conf.template docker compose up -d nginx
 sleep 5
 
-# ─── 2. 인증서 발급 ───
-echo "[3/5] Let's Encrypt 인증서 발급 중..."
 docker compose run --rm --entrypoint "certbot certonly \
     --webroot \
     --webroot-path=/var/www/certbot \
@@ -24,20 +48,7 @@ docker compose run --rm --entrypoint "certbot certonly \
     --no-eff-email \
     -d ${DOMAIN_NAME}" certbot
 
-# ─── 3. HTTPS 전환 + 로컬 전용으로 시작 (certbot 제외) ───
-echo "[4/5] HTTPS 모드 전환 (LAN 전용)..."
-BIND_ADDRESS=${LOCAL_IP} docker compose up -d postgres n8n nginx
-
-echo ""
-echo "=== 관리자 계정을 생성하세요 ==="
-echo "같은 네트워크의 PC에서 https://${LOCAL_IP} 접속 후"
-echo "관리자 계정을 생성하고 Enter 를 눌러주세요."
-echo "(자체 서명 인증서 경고가 뜨지만 무시하고 진행)"
-echo ""
-read -p "관리자 계정 생성 완료 → Enter..."
-
-# ─── 4. 외부 접근 개방 + certbot 포함 전체 시작 ───
-echo "[5/5] 외부 접근 개방 중..."
+echo "[6/6] HTTPS 모드 전환 + 외부 접근 개방..."
 docker compose up -d
 
 echo ""
